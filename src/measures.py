@@ -9,9 +9,7 @@ K_CS = 3 - 2 * np.sqrt(2)
 
 
 def cs(high, low):
-    """Corwin-Schultz (2012) spread from bars t-1, t:
-    alpha = (sqrt(2 beta) - sqrt(beta)) / k - sqrt(gamma / k), k = 3 - 2 sqrt 2,
-    S = 2 (e^alpha - 1) / (1 + e^alpha), clipped at 0, times m."""
+    """Corwin-Schultz spread of Appendix A from bars t-1 and t, clipped at 0."""
     hl = np.log(high / low) ** 2
     beta = hl + hl.shift(1)
     gamma = np.log(np.maximum(high, high.shift(1)) / np.minimum(low, low.shift(1))) ** 2
@@ -20,7 +18,7 @@ def cs(high, low):
 
 
 def kyle(close, quote_volume, bars):
-    """Kyle-Obizhaeva illiquidity: m (mean r^2 / sum quote volume)^(1/3) over `bars` bars; zero volume -> NaN."""
+    """Kyle illiquidity of equation (2) over `bars` bars; NaN on zero volume."""
     r2 = np.log(close).diff() ** 2
     qv = quote_volume.rolling(bars).sum()
     return M * (r2.rolling(bars).mean() / qv.where(qv > 0)) ** (1 / 3)
@@ -32,13 +30,14 @@ def rv(close, bars):
 
 
 def liquidity(df, reg):
-    """Table 2 per pair x regime: mean K and $ million per day (sum quote volume / days in regime).
-    CS is not reported in levels (zero on single-trade bars)."""
+    """Table 2: mean Kyle illiquidity and daily quote volume in millions of the quote currency."""
+    # CS is left out: it is zero on single-trade bars.
     rows = {}
     for pair, label in LABELS.items():
         k = kyle(df[f"{pair}_close"], df[f"{pair}_quote_volume"], K_BARS)
         for r in REGIMES:
             in_r = reg == r
+            days = in_r.sum() / 1440
             rows[(label, r)] = {"K": k[in_r].mean(),
-                                "$M/day": df.loc[in_r, f"{pair}_quote_volume"].sum() / (in_r.sum() / 1440) / 1e6}
+                                "$M/day": df.loc[in_r, f"{pair}_quote_volume"].sum() / days / 1e6}
     return pd.DataFrame(rows).T

@@ -14,13 +14,13 @@ def load():
 
 
 def to_bars(df, freq):
-    """Aggregate one-minute klines to `freq` bars (high max, low min, close last, volumes summed)."""
+    """Aggregate one-minute klines to `freq` bars by the AGG rule of each field."""
     rules = {c: AGG[c.split("_", 2)[2]] for c in df.columns}
     return df.resample(freq).agg(rules)
 
 
 def decompose(df, coin):
-    """D = m(ln B/Q - ln B/U), delta = m ln Q/U, b = -D - delta; F = all legs traded, FF = F_t F_{t-1}."""
+    """D, delta and b of equation (3) for `coin`, with the flags F and FF of equation (1)."""
     bq, qu = COINS[coin]
     out = pd.DataFrame(index=df.index)
     out["D"] = M * (np.log(df[f"{bq}_close"]) - np.log(df[f"{BU}_close"]))

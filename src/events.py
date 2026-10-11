@@ -1,5 +1,4 @@
-"""Depeg event windows: port of the original DepeggingDetector._detect_one_threshold.
-Start rewind and merge: Perez Riaza & Gnabo (2025, Sec. 6.1); 60-min minimum: original code."""
+"""Depeg event windows of Section 2.2."""
 
 import numpy as np
 import pandas as pd
@@ -23,7 +22,7 @@ def _runs(mask):
 
 
 def _early_start(price, runs):
-    """Move each run start back to the last bar exactly at the peg, unless the bar before is at the peg."""
+    """Rewind each start to the last bar at the peg, unless the bar before is at the peg."""
     out = []
     for start, end in runs:
         pos = price.index.searchsorted(start)
@@ -33,6 +32,7 @@ def _early_start(price, runs):
         i = pos - 1
         while i >= 0 and abs(price.iloc[i] - PEG) > PEG_TOL:
             i -= 1
+        # No bar at the peg before the run: i = -1 wraps to the last bar and the event is dropped.
         out.append((price.index[i], end))
     return out
 
@@ -48,15 +48,10 @@ def _merge(runs):
     return sorted(out)
 
 
-def detect(close, freq, theta, rewind):
-    """Depeg events of a Q/U close: last close per `freq` bar outside [peg - theta, peg + theta].
-    Port of _detect_one_threshold: runs, start rewind, merge within MERGE_WITHIN, keep end - start >= MIN_DURATION.
-    rewind=False starts each run at the threshold crossing (the source's main start rule; robustness R6).
-    The rewind moves a start back to the last bar exactly at the peg, which can lengthen a short breach;
-    if the bar before the run is already at the peg the start is kept; if no bar at the peg exists before
-    the run, the original's index -1 wraps to the last bar (kept as is; unreachable on this data)."""
+def detect(close, freq, tau, rewind):
+    """Runs of `freq` closes with |p - PEG| >= tau, rewound if asked, merged, >= MIN_DURATION."""
     price = close.resample(freq).last()
-    runs = _runs((price <= PEG - theta) | (price >= PEG + theta))
+    runs = _runs((price <= PEG - tau) | (price >= PEG + tau))
     runs = _merge(_early_start(price, runs) if rewind else runs)
     return [(s, e) for s, e in runs if e - s >= pd.Timedelta(MIN_DURATION)]
 
