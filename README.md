@@ -4,7 +4,7 @@ This study asks whether liquidity governed how stablecoin peg stress passed thro
 
 ## Findings
 
-During the crisis, the peg deviation carried most of the basis variance, while the triangular arbitrage deviation decayed with a half-life of 0.82 minutes for USDT and 0.52 minutes for USDC. Liquidity did not measurably govern the pass-through. The effect of USDC/USD illiquidity is significant at 1-minute sampling but not robust, as it loses significance on 5-minute bars. Price discovery stayed in BTC/USD, while BTC/USDC partly decoupled from it and traded with the USDC peg. The share of BTC/USDC forecast error variance due to BTC/USD fell from 32.4% before the crisis to 21.4% during it, and USDC/USD and BTC/USDC Granger-caused each other only during the crisis. The stress that reached the stablecoin price of Bitcoin was the peg itself, not a failure of arbitrage.
+During the crisis, the peg deviation carried most of the basis variance, while the triangular arbitrage deviation decayed with a half-life of 0.82 minutes for USDT and 0.52 minutes for USDC. Liquidity did not measurably govern the pass-through. The effect of USDC/USD illiquidity is significant at 1-minute sampling but not robust, as it is significant only at 10% on 5-minute bars. Price discovery stayed in BTC/USD, while BTC/USDC partly decoupled from it and traded with the USDC peg. The share of BTC/USDC forecast error variance due to BTC/USD fell from 32.4% before the crisis to 21.4% during it, and USDC/USD and BTC/USDC Granger-caused each other only during the crisis. The stress that reached the stablecoin price of Bitcoin was the peg itself, not a failure of arbitrage.
 
 ## Layout
 
